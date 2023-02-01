@@ -13,7 +13,7 @@ app.use(express.json())
 
 //Health endpoints, unauthenticated
 app.get('/healthz',(req,res)=>{
-    res.status(200).send()
+    res.status(200).json("success")
 })
 // authenticated functions
 const authenticate = async(req,res,next)=>{
@@ -31,12 +31,14 @@ const authenticate = async(req,res,next)=>{
         
         
         const psd = await getPassword(username)
-        const psdObj = String(psd['password'])
-        const check = bcrypt.compare(password,psdObj)
+        const psdString = JSON.stringify(psd)
+        const objectValue = JSON.parse(psdString)
+        
+        console.log(objectValue["password"])
+        const check = await bcrypt.compare(password,objectValue["password"])
+        console.log(check)
         //if not valid
         if(!check){
-            console.log(psd)
-            console.log(password)
             var err  = new Error('Not Authenticated!')
             //set status
             res.status(401).set('WWW-Authenticate','Basic')
@@ -102,34 +104,34 @@ app.post('/v1/user',async(req,res)=>{
         res.status(400).send('Bad Request')   
     }
 })
-app.post('/users', async(req,res)=>{
-    try{
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(req.body.password,salt)
-        console.log(salt)
-        console.log(hashedPassword)
-        const user = {name:req.body.name,password:hashedPassword}
-        users.push(user)
-        res.status(201).send(user)
-        hash(salt+password)
-    }catch{
-        res.status(500).send()
-    }
+// app.post('/users', async(req,res)=>{
+//     try{
+//         const salt = await bcrypt.genSalt(10)
+//         const hashedPassword = await bcrypt.hash(req.body.password,salt)
+//         console.log(salt)
+//         console.log(hashedPassword)
+//         const user = {name:req.body.name,password:hashedPassword}
+//         users.push(user)
+//         res.status(201).send(user)
+//         hash(salt+password)
+//     }catch{
+//         res.status(500).send()
+//     }
     
-})
-app.post('/users/login',async(req,res) => {
-    const user = users.find(user=>user.name = req.body.name)
-    if(user== null) {
-        return res.status(400).send('Cannot find user')
-    }
-    try{
-        if(await bcrypt.compare(req.body.password,user.password)){
-            res.send('Success')
-        } else {
-            res.send('Not Allowed')
-        }
-    }catch{
-        res.status(500).send()
-    }
-})
+// })
+// app.post('/users/login',async(req,res) => {
+//     const user = users.find(user=>user.name = req.body.name)
+//     if(user== null) {
+//         return res.status(400).send('Cannot find user')
+//     }
+//     try{
+//         if(await bcrypt.compare(req.body.password,user.password)){
+//             res.send('Success')
+//         } else {
+//             res.send('Not Allowed')
+//         }
+//     }catch{
+//         res.status(500).send()
+//     }
+// })
 app.listen(3000)
