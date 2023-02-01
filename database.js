@@ -49,5 +49,12 @@ export async function update(first_name,last_name,password,id){
         return false
         
 }
+export async function password(id){
+    const [result] = await pool.query(`SELECT
+    password 
+    FROM test
+    WHERE id =?`,[id])
+    return result
+}
 // const res = await update ('test2','test2',"test2",'test2',3)
 // console.log(res)
