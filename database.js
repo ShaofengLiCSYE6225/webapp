@@ -32,15 +32,16 @@ export async function createNote(first_name,last_name,password,username){
         id:result.insertId,
         first_name,
         last_name,
-        password
+        password,
+        username
     }
 }
 export async function update(first_name,last_name,password,id){
-    const date = new Date().toISOString().slice(0,19).replace('T',' ')
+    // const date = new Date().toISOString().slice(0,19).replace('T',' ')
     
         const [result] = await pool.query(`
-        UPDATE test SET first_name = ?,last_name = ?, password =?, account_updated =? WHERE id = ?
-        `, [first_name,last_name,password,date,id])
+        UPDATE test SET first_name = ?,last_name = ?, password =? WHERE id = ?
+        `, [first_name,last_name,password,id])
         if(result!=null){
             // console.log(result)
             return true
