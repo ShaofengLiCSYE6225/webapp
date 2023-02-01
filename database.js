@@ -54,7 +54,7 @@ export async function getPassword(username){
     password 
     FROM test
     WHERE username =?`,[username])
-    return result[0]
+    return result
 }
 // const res = await getPassword ('jd@123.com')
 // console.log(res)
