@@ -2,7 +2,7 @@ import express from 'express'
 // const express =  require('express')
 const app = express()
 import bcrypt ,{hash} from 'bcrypt'
-import { getData,getDataById,createNote,update } from './database.js'
+import { getData,getDataById,createNote,update,getPassword} from './database.js'
 // const bcrypt = require('bcrypt')
 // const { hash } = require('bcrypt')
 
@@ -29,9 +29,14 @@ const authenticate = async(req,res,next)=>{
         var username = credentials[0]
         var password = credentials[1]
         
-
+        
+        const psd = await getPassword(username)
+        const psdObj = String(psd['password'])
+        const check = bcrypt.compare(password,psdObj)
         //if not valid
-        if(!(username === 'admin' && password == 'admin123')){
+        if(!check){
+            console.log(psd)
+            console.log(password)
             var err  = new Error('Not Authenticated!')
             //set status
             res.status(401).set('WWW-Authenticate','Basic')

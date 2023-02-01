@@ -49,12 +49,12 @@ export async function update(first_name,last_name,password,id){
         return false
         
 }
-export async function password(id){
+export async function getPassword(username){
     const [result] = await pool.query(`SELECT
     password 
     FROM test
-    WHERE id =?`,[id])
+    WHERE username =?`,[username])
     return result
 }
-// const res = await update ('test2','test2',"test2",'test2',3)
+// const res = await getPassword ('jd@123.com')
 // console.log(res)
