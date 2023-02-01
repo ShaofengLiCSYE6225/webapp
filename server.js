@@ -132,4 +132,4 @@ app.post('/users/login',async(req,res) => {
         res.status(500).send()
     }
 })
-app.listen(3000)
+export const server = app.listen(3000)
