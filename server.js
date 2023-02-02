@@ -34,12 +34,17 @@ const authenticate = async(req,res,next)=>{
         // const psdObj = JSON.stringify(psd)
         const check = await bcrypt.compare(password,psd[0].password)
         //if not valid
-        if(!check){
-            console.log(psd)
-            console.log(password)
-            var err  = new Error('Not Authenticated!')
+        if(psd[0].id!=req.params.userId){
+            // console.log(psd)
+            // console.log(password)
+            var err  = new Error('Forbidden')
             //set status
-            res.status(401).set('WWW-Authenticate','Basic')
+            res.status(403).set('WWW-Authenticate','Basic').json({msg:"Forbidden"})
+            next(err)
+        }
+        if (!check){
+            var err = new Error('Unauthorized')
+            res.status(401).set('WWW-Authenticate','Basic').json({msg:"Unauthorized"})
             next(err)
         }
         res.status(200)
@@ -80,10 +85,13 @@ app.put('/v1/user/:userId',authenticate,async(req,res)=>{
 // create a user account
 // public
 app.post('/v1/user',async(req,res)=>{
-    const {first_name,last_name,password,username} = req.body
+    try {
+        const {first_name,last_name,password,username} = req.body
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(req.body.password,salt)
-    try {
+        if(req.body.first_name==null||req.body.last_name==null||req.body.password==null){
+            res.status(400).json({msg:"Bad Request"});    
+        }
         const valid = username.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi)
         if(valid!=null){
             const note  = await createNote(first_name,last_name,hashedPassword,username)
