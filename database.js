@@ -52,7 +52,7 @@ export async function update(first_name,last_name,password,id){
 }
 export async function getPassword(username){
     const [result] = await pool.query(`SELECT
-    password 
+    id, password 
     FROM test
     WHERE username =?`,[username])
     return result
