@@ -13,7 +13,11 @@ import {createProduct,findProductById, updateProduct,deleteProduct} from './cont
  // const bcrypt = require('bcrypt')
 // const { hash } = require('bcrypt')
 
-sequelize.sync()
+sequelize.sync().then((res)=>{
+    console.log(res[0])
+}).catch((error)=>{
+    console.log(error);
+})
 // await sequelize.close()
 // sequelize.authenticate().then(() => {
 //     console.log('connect')

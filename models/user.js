@@ -1,4 +1,4 @@
-import {Sequelize} from 'Sequelize'
+import {Sequelize} from 'sequelize'
 import sequelize from '../config/index.js'
 
 const User = sequelize.define("users" ,{
