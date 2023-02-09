@@ -9,14 +9,14 @@ const{
 } = process.env
 
 
-const sequelize = new Sequelize(DATABASE_NAME,DATABASE_USERNAME,DATABASE_PASSWORD,{
+const  sequelize = new Sequelize(DATABASE_NAME,DATABASE_USERNAME,DATABASE_PASSWORD,{
     dialect:DIALECT
 })
 
-sequelize.authenticate().then(()=>{
-    console.log('connected')
-}).catch((error)=>{
-    console.log('Unable',error)
-})
+// sequelize.authenticate().then(()=>{
+//     console.log('connected')
+// }).catch((error)=>{
+//     console.log('Unable',error)
+// })
 
 export default sequelize
