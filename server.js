@@ -298,11 +298,11 @@ app.get('/v1/product/:productId',async(req,res)=>{
 })
 
 // sequelize.close()
-const app1 = express()
-app1.use(express.json())
-app1.get('/healthz',(req,res)=>{
-    res.status(200).send()
-})
+// const app1 = express()
+// app1.use(express.json())
+// app1.get('/healthz',(req,res)=>{
+//     res.status(200).send()
+// })
 
-export const server1 = app.listen(3001)
+// export const server1 = app.listen(3001)
 export const server = app.listen(3000)
