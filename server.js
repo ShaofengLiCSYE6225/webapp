@@ -14,6 +14,7 @@ import {createProduct,findProductById, updateProduct,deleteProduct} from './cont
 // const { hash } = require('bcrypt')
 
 sequelize.sync()
+// await sequelize.close()
 // sequelize.authenticate().then(() => {
 //     console.log('connect')
 // }).catch((error)=> {
@@ -27,7 +28,7 @@ app.use(express.json())
 // }
 
 // app.use(cors(corOptions))
-app.use(express.urlencoded({extended:true}))
+// app.use(express.urlencoded({extended:true}))
 
 
 //Health endpoints, unauthenticated
@@ -295,4 +296,13 @@ app.get('/v1/product/:productId',async(req,res)=>{
         res.status(400).send()
     }
 })
+
+// sequelize.close()
+const app1 = express()
+app1.use(express.json())
+app1.get('/healthz',(req,res)=>{
+    res.status(200).send()
+})
+
+export const server1 = app.listen(3001)
 export const server = app.listen(3000)
