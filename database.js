@@ -1,14 +1,14 @@
 import mysql from 'mysql2'
-
+import User from './models/user.js'
 import dotenv from 'dotenv'
-dotenv.config()
+// dotenv.config()
 
-export const pool = mysql.createPool({
-    host:process.env.MYSQL_HOST,
-    user:process.env.MYSQL_USER,
-    password:process.env.MYSQL_PASSWORD,
-    database:process.env.MYSQL_DATABASE
-}).promise()
+// export const pool = mysql.createPool({
+//     host:process.env.MYSQL_HOST,
+//     user:process.env.MYSQL_USER,
+//     password:process.env.MYSQL_PASSWORD,
+//     database:process.env.MYSQL_DATABASE
+// }).promise()
 
 export async function getData(){
     const [rows] = await pool.query("select distinct id,username,first_name,last_name,account_created,account_updated from test")
