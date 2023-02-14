@@ -104,3 +104,7 @@ dist
 .tern-port
 # only for MacOS
 .DS_Store
+#terraform
+.terraform
+*.tfstate
+*.tfstate.backup
