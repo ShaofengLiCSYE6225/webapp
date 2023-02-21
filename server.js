@@ -100,6 +100,11 @@ const authenticateProductUpdate = async(req,res,next)=>{
             // console.log(req.params.userId)
             //if not valid
             const productInfo = await findProductById(req.params.productId)
+            console.log(productInfo[0])
+            if (typeof(productInfo[0]) === "undefined") {
+                var err = new Error('Not Found')
+                res.status(404).send()
+            }
             const productOwner = productInfo[0].dataValues.owner_user_id
             if(psd[0].dataValues.id!=productOwner){
                 // console.log(psd)
@@ -231,7 +236,7 @@ app.post('/v1/product',authenticateProduct,async(req,res)=>{
         .split(':')
         const userInfo = await findByUsername(credentials[0])
         const owner_user_id = userInfo[0].dataValues.id
-        if(!Number.isInteger(quantity)){
+        if(!Number.isInteger(quantity)||!String.isString(name)||!String.isString(description)||String.isString(sku)||String.isString(manufacturer)){
         res.status(400).send() 
         } else {
         const product = await createProduct(name,description,sku,manufacturer,quantity,owner_user_id)
@@ -254,7 +259,7 @@ app.put('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
         // // const product = await findProductById(productId)
         // if (owner_user_id === product[0].dataValues.owner_user_id){
             const {name,description,sku,manufacturer,quantity} = req.body
-            if(name==null||description==null||sku==null||manufacturer==null||quantity==null||!Number.isInteger(quantity)){
+            if(name==null||description==null||sku==null||manufacturer==null||quantity==null||!Number.isInteger(quantity)||!String.isString(name)||!String.isString(description)||String.isString(sku)||String.isString(manufacturer)){
                 res.status(400).send()
             } else {
                 await updateProduct(req.params.productId,name,description,sku,manufacturer,quantity)
@@ -273,7 +278,7 @@ app.put('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
 app.patch('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
     try {
         const {name,description,sku,manufacturer,quantity} = req.body
-        if(Number.isInteger(quantity)){
+        if(Number.isInteger(quantity)&&String.isString(name)&&String.isString(description)&&String.isString(sku)&&String.isString(manufacturer)){
             const productInfo = await updateProduct(req.params.productId,name,description,sku,manufacturer,quantity)
             res.status(204).send()
         }

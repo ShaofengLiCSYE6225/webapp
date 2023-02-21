@@ -64,7 +64,8 @@ export async function deleteProduct(id){
             id : id
         }
     })
-    await productInfo[0].destroy();
+    const res =await productInfo[0].destroy();
+
 }
 // const test = await updateProduct(2,'1','1','1','1','1')
 // console.log(test)
