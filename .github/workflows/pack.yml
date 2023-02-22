@@ -1,0 +1,35 @@
+name: Node.js CI
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    types:
+      - closed
+env:
+    AWS_ACCESS_KEY: ${{secrets.AWS_ACCESS_KEY}}
+    AWS_SECRET_ACCESS_KEY: ${{secrets_AWS_SECRET_ACCESS_KEY}}
+jobs:
+  
+  if_merged:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Zip webapp  
+        run: | 
+          "cd .."
+          "zip -r webapp.zip webapp/"
+          "cd webapp"
+          
+      - name: Setup `packer`
+        uses: hashicorp/setup-packer@main
+        id: setup
+        with:
+         version: "1.8.3" # or 'latest'
+        
+      - name: Run `packer init`
+        id: init
+        run: "packer init ./webapp.par.hcl"
+      - name: Build `AMI`
+        run: "packer build ./webapp.pkr.hcl"
+      
+    
