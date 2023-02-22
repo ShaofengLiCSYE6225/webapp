@@ -70,7 +70,7 @@ build {
 
   }
   provisioner "shell" {
-    script = "./app.sh"
+    script = "./packer/app.sh"
   }
 
 
