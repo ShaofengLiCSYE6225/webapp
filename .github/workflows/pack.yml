@@ -19,16 +19,16 @@ jobs:
           cd ..
           zip -r webapp.zip webapp/
           cd webapp
+          ls -al
+          sleep 10
           
       - name: Setup `packer`
         uses: hashicorp/setup-packer@main
         id: setup
-        with:
-         version: "1.8.3" # or 'latest'
         
       - name: Run `packer init`
-        id: init
         run: packer init ./packer/webapp.pkr.hcl
+
       - name: Build `AMI`
         run: packer build ./packer/webapp.pkr.hcl
       
