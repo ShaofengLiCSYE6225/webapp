@@ -24,11 +24,11 @@ jobs:
 
       - name: Run `packer init`
         id: init
-        run: "packer init ./webapp.pkr.hcl"
+        run: "packer init ./packer/webapp.pkr.hcl"
 
       - name: Run `packer validate`
         id: validate
-        run: "packer validate ./webapp.pkr.hcl"
+        run: "packer validate ./packer/webapp.pkr.hcl"
 
       - run: npm ci 
       - run: npm test

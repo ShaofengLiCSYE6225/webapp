@@ -28,8 +28,8 @@ jobs:
         
       - name: Run `packer init`
         id: init
-        run: "packer init ./webapp.par.hcl"
+        run: "packer init ./packer/webapp.pkr.hcl"
       - name: Build `AMI`
-        run: "packer build ./webapp.pkr.hcl"
+        run: "packer build ./packer/webapp.pkr.hcl"
       
     
