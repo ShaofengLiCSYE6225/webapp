@@ -23,7 +23,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
-
+      - name: Zip webapp  
+        run: | 
+          "cd .."
+          "zip -r webapp.zip webapp/"
+          "cd webapp"
       - name: Run `packer init`
         id: init
         run: "packer init ./packer/webapp.pkr.hcl"
