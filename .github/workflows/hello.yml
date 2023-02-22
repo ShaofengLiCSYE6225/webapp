@@ -25,16 +25,16 @@ jobs:
           node-version: 16
       - name: Zip webapp  
         run: | 
-          "cd .."
-          "zip -r webapp.zip webapp/"
-          "cd webapp"
+          cd ..
+          zip -r webapp.zip webapp/
+          cd webapp
       - name: Run `packer init`
         id: init
-        run: "packer init ./packer/webapp.pkr.hcl"
+        run: packer init ./packer/webapp.pkr.hcl
 
       - name: Run `packer validate`
         id: validate
-        run: "packer validate ./packer/webapp.pkr.hcl"
+        run: packer validate ./packer/webapp.pkr.hcl
 
       - run: npm ci 
       - run: npm test
