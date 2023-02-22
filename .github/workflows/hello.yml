@@ -6,7 +6,9 @@ name: Node.js CI
 on:
   pull_request:
     branches: [ "main" ]
-
+env:
+    AWS_ACCESS_KEY: ${{secrets.AWS_ACCESS_KEY}}
+    AWS_SECRET_ACCESS_KEY: ${{secrets_AWS_SECRET_ACCESS_KEY}}
 jobs:
   build:
 
