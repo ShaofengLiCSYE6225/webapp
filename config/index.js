@@ -2,9 +2,9 @@ import {Sequelize} from 'sequelize'
 import dotenv from 'dotenv'
 dotenv.config()
 const{
-    DATABASE_NAME= 'assignment2' ,
+    DATABASE_NAME= 'webapp' ,
     DATABASE_USERNAME = 'root' ,
-    DATABASE_PASSWORD = '12345678',
+    DATABASE_PASSWORD = 'Lsf123',
     DIALECT = 'mysql' 
 } = process.env
 

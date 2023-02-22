@@ -14,12 +14,23 @@ jobs:
 
     runs-on: ubuntu-latest
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
+    
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js 16
-      uses: actions/setup-node@v3
-      with:
-        node-version: 16
-    - run: npm ci 
-    - run: npm test
+      - name: Checkout
+        uses: actions/checkout
+
+      - name: Use Node.js 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          
+      - name: Run `packer init`
+        id: init
+        run: "packer init ./webapp.par.hcl"
+
+      - name: Run `packer validate`
+        id: validate
+        run: "packer validate ./webapp.pkr.hcl"
+
+      - run: npm ci 
+      - run: npm test
