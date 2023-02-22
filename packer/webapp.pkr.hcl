@@ -20,13 +20,7 @@ variable "subnet_id" {
   type    = string
   default = "subnet-6e091909"
 }
-variable "access_key" {
-  type = string
-}
 
-variable "secret_key" {
-  type = string
-}
 source "amazon-ebs" "webapp" {
   # which ami to use as the base
   # where to save the ami
@@ -35,8 +29,6 @@ source "amazon-ebs" "webapp" {
   instance_type = "t2.micro"
   region        = "us-east-1"
   # ssh_username = "ec2-user"
-  access_key = var.access_key
-  secret_key = var.secret_key
   ami_description = "AMI for CSYE 6225"
   ami_regions = [
     "us-east-1",
