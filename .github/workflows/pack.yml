@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Packer
 
 on:
   pull_request:
