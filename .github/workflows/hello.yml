@@ -15,7 +15,7 @@ jobs:
     
     steps:
       - name: Checkout
-        uses: actions/checkout
+        uses: actions/checkout@v3
 
       - name: Use Node.js 16
         uses: actions/setup-node@v3
@@ -24,7 +24,7 @@ jobs:
 
       - name: Run `packer init`
         id: init
-        run: "packer init ./webapp.par.hcl"
+        run: "packer init ./webapp.pkr.hcl"
 
       - name: Run `packer validate`
         id: validate
