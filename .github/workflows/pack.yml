@@ -16,9 +16,9 @@ jobs:
     steps:
       - name: Zip webapp  
         run: | 
-          "cd .."
-          "zip -r webapp.zip webapp/"
-          "cd webapp"
+          cd ..
+          zip -r webapp.zip webapp/
+          cd webapp
           
       - name: Setup `packer`
         uses: hashicorp/setup-packer@main
@@ -28,8 +28,8 @@ jobs:
         
       - name: Run `packer init`
         id: init
-        run: "packer init ./packer/webapp.pkr.hcl"
+        run: packer init ./packer/webapp.pkr.hcl
       - name: Build `AMI`
-        run: "packer build ./packer/webapp.pkr.hcl"
+        run: packer build ./packer/webapp.pkr.hcl
       
     
