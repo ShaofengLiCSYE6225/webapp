@@ -30,6 +30,7 @@ source "amazon-ebs" "webapp" {
   region        = "us-east-1"
   # ssh_username = "ec2-user"
   ami_description = "AMI for CSYE 6225"
+  ami_users = [836427038595]//add aws demo id
   ami_regions = [
     "us-east-1",
   ]
