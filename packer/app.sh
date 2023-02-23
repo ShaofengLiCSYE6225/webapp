@@ -15,7 +15,7 @@ sudo yum install -y mysql-community-server
 sudo systemctl start mysqld 
 sudo systemctl enable mysqld
 passwords=$(sudo grep 'temporary password' /var/log/mysqld.log | awk {'print $11'})
-mysql --connect-expired-password -u root -p$passwords -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Lsf123';CREATE DATABASE webapp;"
+mysql --connect-expired-password -u root -p$passwords -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Lsf123!';CREATE DATABASE webapp;"
 
 
 sudo systemctl start mysqld 

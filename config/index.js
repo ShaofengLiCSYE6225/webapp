@@ -4,7 +4,7 @@ dotenv.config()
 const{
     DATABASE_NAME= 'webapp' ,
     DATABASE_USERNAME = 'root' ,
-    DATABASE_PASSWORD = 'Lsf123',
+    DATABASE_PASSWORD = 'Lsf123!',
     DIALECT = 'mysql' 
 } = process.env
 
