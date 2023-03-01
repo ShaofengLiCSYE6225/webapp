@@ -236,12 +236,12 @@ app.post('/v1/product',authenticateProduct,async(req,res)=>{
         .split(':')
         const userInfo = await findByUsername(credentials[0])
         const owner_user_id = userInfo[0].dataValues.id
-        if(!Number.isInteger(quantity)||!String.isString(name)||!String.isString(description)||String.isString(sku)||String.isString(manufacturer)){
-        res.status(400).send() 
-        } else {
+       // if(!Number.isInteger(quantity)||!String.isString(name)||!String.isString(description)||String.isString(sku)||String.isString(manufacturer)){
+       // res.status(400).send() 
+        //} else {
         const product = await createProduct(name,description,sku,manufacturer,quantity,owner_user_id)
         res.status(201).json(product)
-        }
+        //}
     } catch (error) {
         res.status(400).send()
     }
