@@ -24,7 +24,7 @@ sequelize.sync().then((res)=>{
 // }).catch((error)=> {
 //     console.error('unable',error)
 // })
-app.use(express.json())
+app.use(express.json()
 
 
 // var corOptions = {
