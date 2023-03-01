@@ -259,7 +259,7 @@ app.put('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
         // // const product = await findProductById(productId)
         // if (owner_user_id === product[0].dataValues.owner_user_id){
             const {name,description,sku,manufacturer,quantity} = req.body
-            if(name==null||description==null||sku==null||manufacturer==null||quantity==null||!Number.isInteger(quantity)||!String.isString(name)||!String.isString(description)||String.isString(sku)||String.isString(manufacturer)){
+            if(name==null||description==null||sku==null||manufacturer==null||quantity==null||!Number.isInteger(quantity)){
                 res.status(400).send()
             } else {
                 await updateProduct(req.params.productId,name,description,sku,manufacturer,quantity)
@@ -278,7 +278,7 @@ app.put('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
 app.patch('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
     try {
         const {name,description,sku,manufacturer,quantity} = req.body
-        if(Number.isInteger(quantity)&&String.isString(name)&&String.isString(description)&&String.isString(sku)&&String.isString(manufacturer)){
+        if(Number.isInteger(quantity)){
             const productInfo = await updateProduct(req.params.productId,name,description,sku,manufacturer,quantity)
             res.status(204).send()
         }
