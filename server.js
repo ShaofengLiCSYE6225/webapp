@@ -314,4 +314,4 @@ app.get('/v1/product/:productId',async(req,res)=>{
 // })
 
 // export const server1 = app.listen(3001)
-export const server = app.listen(3000)
+export const server = app.listen(3000
