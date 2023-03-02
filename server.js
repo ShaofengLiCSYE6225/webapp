@@ -1,4 +1,5 @@
 import express from 'express'
+import multer from 'multer'
 // const express =  require('express')
 const app = express()
 import bcrypt ,{hash} from 'bcrypt'
@@ -6,6 +7,26 @@ import bcrypt ,{hash} from 'bcrypt'
 import sequelize from './models/index.js'
 import {create,findByUsername,findById,update} from './controllers/user.js'
 import {createProduct,findProductById, updateProduct,deleteProduct} from './controllers/product.js'
+import {createImage,findImageById,findImageAll,deleteImageById} from './controllers/image.js'
+import{S3Client,PutObjectCommand,GetObjectCommand,DeleteObjectCommand} from "@aws-sdk/client-s3"
+import crypto from 'crypto'
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import dotenv from 'dotenv'
+dotenv.config()
+
+const bucketName= process.env.AWS_BUCKET_NAME
+const bucketRegion= process.env.AWS_BUCKET_REGION
+
+
+const s3 = new S3Client({
+    // credentials:{
+    //     accessKeyId:process.env.ACCESS_KEY,
+    //     secretAccessKey:process.env.SECRET_ACCESS_KEY
+    // },
+    // bucktname:process.env.BUCKET_NAME,
+    region:bucketRegion
+})
+
 // import User from './routes/user.js'
 // import user from './controllers/user.js'
 // require('dotenv').config()
@@ -24,6 +45,10 @@ sequelize.sync().then((res)=>{
 // }).catch((error)=> {
 //     console.error('unable',error)
 // })
+const storage = multer.memoryStorage()
+const upload = multer({storage:storage})
+
+
 app.use(express.json())
 
 
@@ -100,7 +125,7 @@ const authenticateProductUpdate = async(req,res,next)=>{
             // console.log(req.params.userId)
             //if not valid
             const productInfo = await findProductById(req.params.productId)
-            console.log(productInfo[0])
+            // console.log(productInfo[0])
             if (typeof(productInfo[0]) === "undefined") {
                 var err = new Error('Not Found')
                 res.status(404).send()
@@ -236,7 +261,10 @@ app.post('/v1/product',authenticateProduct,async(req,res)=>{
         .split(':')
         const userInfo = await findByUsername(credentials[0])
         const owner_user_id = userInfo[0].dataValues.id
-        if(!Number.isInteger(quantity)||!String.isString(name)||!String.isString(description)||String.isString(sku)||String.isString(manufacturer)){
+        // console.log(!String.isString(name))
+        // console.log(1)
+        if(!Number.isInteger(quantity)){
+        console.log(1)
         res.status(400).send() 
         } else {
         const product = await createProduct(name,description,sku,manufacturer,quantity,owner_user_id)
@@ -259,7 +287,7 @@ app.put('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
         // // const product = await findProductById(productId)
         // if (owner_user_id === product[0].dataValues.owner_user_id){
             const {name,description,sku,manufacturer,quantity} = req.body
-            if(name==null||description==null||sku==null||manufacturer==null||quantity==null||!Number.isInteger(quantity)||!String.isString(name)||!String.isString(description)||String.isString(sku)||String.isString(manufacturer)){
+            if(name==null||description==null||sku==null||manufacturer==null||quantity==null||!Number.isInteger(quantity)){
                 res.status(400).send()
             } else {
                 await updateProduct(req.params.productId,name,description,sku,manufacturer,quantity)
@@ -278,7 +306,7 @@ app.put('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
 app.patch('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
     try {
         const {name,description,sku,manufacturer,quantity} = req.body
-        if(Number.isInteger(quantity)&&String.isString(name)&&String.isString(description)&&String.isString(sku)&&String.isString(manufacturer)){
+        if(Number.isInteger(quantity)){
             const productInfo = await updateProduct(req.params.productId,name,description,sku,manufacturer,quantity)
             res.status(204).send()
         }
@@ -290,6 +318,7 @@ app.patch('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
 
 app.delete('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
     try {
+
         await deleteProduct(req.params.productId)
         res.status(204).send()
     } catch (error) {
@@ -306,6 +335,79 @@ app.get('/v1/product/:productId',async(req,res)=>{
     }
 })
 
+//get list of all images uploaded
+app.get('/v1/product/:productId/image',authenticateProductUpdate,async(req,res)=>{
+    try {
+        const allImage = await findImageAll(req.params.productId)
+        // console.log(allImage)
+        res.status(200).json(allImage)
+    } catch (error) {
+        
+    }
+})
+//upload an image
+app.post('/v1/product/:productId/image',authenticateProductUpdate,upload.single('image'),async(req,res)=>{
+    try {
+        // console.log("req.body",req.body)
+        // console.log("req.file",req.file)
+        // const client = new S3Client(clientParams)
+        // req.file.buffer
+        // const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
+        // const random = randomImageName()
+        const params = {
+            Bucket: bucketName,
+            Key: `${req.params.productId}/${req.file.originalname}`,
+            // Key:req.file.originalname,
+            Body: req.file.buffer,
+            ContentType : req.file.mimetype
+        }
+        const commandPut = new PutObjectCommand(params)
+        // console.log(0)
+        await s3.send(commandPut)
+        // console.log(url)
+        const result = await createImage(req.params.productId,req.file.originalname,params.Key)
+        res.status(201).send(result)
+    } catch (error) {
+       res.status(400).json({error:error})
+    }
+    
+})
+
+//get image details
+app.get('/v1/product/:productId/image/:image_id',authenticateProductUpdate,async(req,res)=>{
+   try {
+    const imageInfo = await findImageById(req.params.image_id,req.params.productId);
+    if(typeof(imageInfo[0])==="undefined"){
+        res.status(403).send()
+    }
+    res.status(200).json(imageInfo[0])
+   } catch (error) {
+    res.status(404).send()
+   }
+//     const getObjectParams = {
+//         Bucket:bucketName,
+//         Key:imageInfo[0].dataValues.file_name
+//    }
+    // const command = new GetObjectCommand(getObjectParams);
+    // const url = await getSignedUrl(client, command, { expiresIn: 3600 });
+})
+
+//delete the image
+app.delete('/v1/product/:productId/image/:image_id',authenticateProductUpdate,async(req,res)=>{
+    try {
+        const imageInfo = await findImageById(req.params.image_id,req.params.productId)
+        const params = {
+            Bucket: bucketName,
+            Key: `${req.params.productId}/${imageInfo[0].dataValues.file_name}`,
+        }
+        const command = new DeleteObjectCommand(params)
+        await s3.send(command)
+        const result = await deleteImageById(req.params.image_id,req.params.productId)
+        res.status(204).send()
+    } catch (error) {
+        res.status(404).send(error)
+    }
+})
 // sequelize.close()
 // const app1 = express()
 // app1.use(express.json())

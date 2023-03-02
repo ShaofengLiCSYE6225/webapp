@@ -28,6 +28,9 @@ jobs:
           cd ..
           zip -r webapp.zip webapp/
           cd webapp
+      - name: Setup
+        run : |
+          echo "DIALECT=mysql" >> ./.env
       - name: Run `packer init`
         id: init
         run: packer init ./packer/webapp.pkr.hcl
