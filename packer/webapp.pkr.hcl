@@ -30,13 +30,14 @@ source "amazon-ebs" "webapp" {
   region        = "us-east-1"
   # ssh_username = "ec2-user"
   ami_description = "AMI for CSYE 6225"
+  profile = "dev"
   ami_users = [836427038595]//add aws demo id
   ami_regions = [
     "us-east-1",
   ]
 
   aws_polling {
-    delay_seconds = 120
+    delay_seconds = 60
     max_attempts  = 50
   }
 

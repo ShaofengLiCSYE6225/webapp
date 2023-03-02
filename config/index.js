@@ -2,15 +2,16 @@ import {Sequelize} from 'sequelize'
 import dotenv from 'dotenv'
 dotenv.config()
 const{
-    DATABASE_NAME= 'webapp' ,
-    DATABASE_USERNAME = 'root' ,
-    DATABASE_PASSWORD = 'Lsf12345678!',
-    DIALECT = 'mysql' 
+    DATABASE_NAME ,//'webapp'
+    DATABASE_USERNAME  ,
+    DATABASE_PASSWORD,
+    DIALECT 
 } = process.env
 
 
 const  sequelize = new Sequelize(DATABASE_NAME,DATABASE_USERNAME,DATABASE_PASSWORD,{
-    dialect:DIALECT
+    dialect:DIALECT,
+    host: process.env.DATABASE_HOST
 })
 
 // sequelize.authenticate().then(()=>{
