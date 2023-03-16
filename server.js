@@ -19,10 +19,10 @@ const bucketRegion= process.env.AWS_BUCKET_REGION
 
 
 const s3 = new S3Client({
-    credentials:{
-        accessKeyId:process.env.ACCESS_KEY,
-        secretAccessKey:process.env.SECRET_ACCESS_KEY
-    },
+    // credentials:{
+    //     accessKeyId:process.env.ACCESS_KEY,
+    //     secretAccessKey:process.env.SECRET_ACCESS_KEY
+    // },
     // bucktname:process.env.BUCKET_NAME,
     region:bucketRegion
 })

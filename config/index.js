@@ -2,14 +2,14 @@ import {Sequelize} from 'sequelize'
 import dotenv from 'dotenv'
 dotenv.config()
 const{
-    // DATABASE_NAME ,//'webapp'
-    // DATABASE_USERNAME  ,
-    // DATABASE_PASSWORD,
-    // DIALECT 
-    DATABASE_NAME = 'assignment2' ,//'webapp'
-    DATABASE_USERNAME = 'root' ,
-    DATABASE_PASSWORD = '12345678',
+    DATABASE_NAME ,//'webapp'
+    DATABASE_USERNAME  ,
+    DATABASE_PASSWORD,
     DIALECT 
+    // DATABASE_NAME = 'assignment2' ,//'webapp'
+    // DATABASE_USERNAME = 'root' ,
+    // DATABASE_PASSWORD = '12345678',
+    // DIALECT 
 } = process.env
 
 
