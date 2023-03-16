@@ -372,7 +372,7 @@ app.post('/v1/product/:productId/image',authenticateProductUpdate,upload.single(
             const result = await createImage(req.params.productId,random,params.Key)
             res.status(201).send(result)  
         }
-        res.status(400).send
+        res.status(400).send()
     } catch (error) {
        res.status(400).json({error:error})
     }
