@@ -352,21 +352,27 @@ app.post('/v1/product/:productId/image',authenticateProductUpdate,upload.single(
         // console.log("req.file",req.file)
         // const client = new S3Client(clientParams)
         // req.file.buffer
-        // const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
-        // const random = randomImageName()
-        const params = {
-            Bucket: bucketName,
-            Key: `${req.params.productId}/${req.file.originalname}`,
-            // Key:req.file.originalname,
-            Body: req.file.buffer,
-            ContentType : req.file.mimetype
+        const randomnumber = Math.random() *100
+        const randomNumberString = randomnumber.toString()
+        const random = req.file.originalname + randomNumberString
+        const filetype =/jpeg|jpg|png/
+        const extname = req.file.originalname
+        if (filetype.test(extname.toLowerCase())) {
+            const params = {
+                Bucket: bucketName,
+                Key: `${req.params.productId}/${random}`,
+                // Key:req.file.originalname,
+                Body: req.file.buffer,
+                ContentType : req.file.mimetype
+            }
+            const commandPut = new PutObjectCommand(params)
+            // console.log(0)
+            await s3.send(commandPut)
+            // console.log(url)
+            const result = await createImage(req.params.productId,random,params.Key)
+            res.status(201).send(result)  
         }
-        const commandPut = new PutObjectCommand(params)
-        // console.log(0)
-        await s3.send(commandPut)
-        // console.log(url)
-        const result = await createImage(req.params.productId,req.file.originalname,params.Key)
-        res.status(201).send(result)
+        res.status(400).send
     } catch (error) {
        res.status(400).json({error:error})
     }
