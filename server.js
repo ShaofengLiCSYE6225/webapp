@@ -19,10 +19,10 @@ const bucketRegion= process.env.AWS_BUCKET_REGION
 
 
 const s3 = new S3Client({
-    // credentials:{
-    //     accessKeyId:process.env.ACCESS_KEY,
-    //     secretAccessKey:process.env.SECRET_ACCESS_KEY
-    // },
+    credentials:{
+        accessKeyId:process.env.ACCESS_KEY,
+        secretAccessKey:process.env.SECRET_ACCESS_KEY
+    },
     // bucktname:process.env.BUCKET_NAME,
     region:bucketRegion
 })
@@ -353,20 +353,31 @@ app.post('/v1/product/:productId/image',authenticateProductUpdate,upload.single(
         // const client = new S3Client(clientParams)
         // req.file.buffer
         // const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
-        // const random = randomImageName()
-        const params = {
-            Bucket: bucketName,
-            Key: `${req.params.productId}/${req.file.originalname}`,
-            // Key:req.file.originalname,
-            Body: req.file.buffer,
-            ContentType : req.file.mimetype
+        console.log("start")
+        const randomnumber = Math.random() *100
+        const randomNumberString = randomnumber.toString()
+        // console.log(randomNumberString)
+        const random = req.file.originalname + randomNumberString
+        // console.log(random)
+        const filetype =/jpeg|jpg|png/
+        const extname = req.file.originalname
+        // console.log(filetype.test(extname.toLowerCase()))
+        if (filetype.test(extname.toLowerCase())){
+            const params = {
+                Bucket: bucketName,
+                Key: `${req.params.productId}/${random}`,
+                // Key:req.file.originalname,
+                Body: req.file.buffer,
+                ContentType : req.file.mimetype
+            }
+            const commandPut = new PutObjectCommand(params)
+            // console.log(0)
+            await s3.send(commandPut)
+            // console.log(url)
+            const result = await createImage(req.params.productId,random,params.Key)
+            res.status(201).send(result)
         }
-        const commandPut = new PutObjectCommand(params)
-        // console.log(0)
-        await s3.send(commandPut)
-        // console.log(url)
-        const result = await createImage(req.params.productId,req.file.originalname,params.Key)
-        res.status(201).send(result)
+       res.status(400).send()
     } catch (error) {
        res.status(400).json({error:error})
     }

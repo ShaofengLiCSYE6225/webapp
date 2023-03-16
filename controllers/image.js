@@ -29,8 +29,9 @@ export async function findImageById(image_id,product_id){
 
 export async function findImageAll(product_id) {
     const List = await Image.findAll({
+           where: {
             product_id:product_id
-        
+        }
     })
     return List
 }
