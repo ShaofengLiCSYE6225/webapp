@@ -354,7 +354,7 @@ app.post('/v1/product/:productId/image',authenticateProductUpdate,upload.single(
         // req.file.buffer
         const randomnumber = Math.random() *100
         const randomNumberString = randomnumber.toString()
-        const random = req.file.originalname + randomNumberString
+        const random = randomNumberString+req.file.originalname  
         const filetype =/jpeg|jpg|png/
         const extname = req.file.originalname
         if (filetype.test(extname.toLowerCase())) {

@@ -6,6 +6,10 @@ const{
     DATABASE_USERNAME  ,
     DATABASE_PASSWORD,
     DIALECT 
+    // DATABASE_NAME = 'assignment2' ,//'webapp'
+    // DATABASE_USERNAME = 'root' ,
+    // DATABASE_PASSWORD = '12345678',
+    // DIALECT 
 } = process.env
 
 
