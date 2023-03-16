@@ -103,7 +103,7 @@ dist
 # TernJS port file
 .tern-port
 # only for MacOS
-.DS_Store
+*.DS_Store
 #terraform
 .terraform
 *.tfstate
