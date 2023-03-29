@@ -9,14 +9,13 @@ import {create,findByUsername,findById,update} from './controllers/user.js'
 import {createProduct,findProductById, updateProduct,deleteProduct} from './controllers/product.js'
 import {createImage,findImageById,findImageAll,deleteImageById} from './controllers/image.js'
 import{S3Client,PutObjectCommand,GetObjectCommand,DeleteObjectCommand} from "@aws-sdk/client-s3"
-import crypto from 'crypto'
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import dotenv from 'dotenv'
+import logger from './log.js'
+import client from './config/statsd.js'
 dotenv.config()
 
 const bucketName= process.env.AWS_BUCKET_NAME
 const bucketRegion= process.env.AWS_BUCKET_REGION
-
 
 const s3 = new S3Client({
     // credentials:{
@@ -35,7 +34,7 @@ const s3 = new S3Client({
 // const { hash } = require('bcrypt')
 
 sequelize.sync().then((res)=>{
-    console.log(res[0])
+    console.log("Success")
 }).catch((error)=>{
     console.log(error);
 })
@@ -62,13 +61,20 @@ app.use(express.json())
 
 //Health endpoints, unauthenticated
 app.get('/healthz',(req,res)=>{
-    res.status(200).send()
+    try {
+        logger.info("Connection health")
+        res.status(200).send()
+        client.increment('healthz')
+    } catch (error) {
+        logger.error(error)
+    }
 })
 // authenticated functions
 const authenticate = async(req,res,next)=>{
     if(!req.get('Authorization')){
         var err= new Error('Not Authenticated')
         //
+        logger.error(err)
         res.status(401).set('WWW-Authenticate','Basic').json()
         next(err)
     }else {
@@ -90,14 +96,17 @@ const authenticate = async(req,res,next)=>{
             // console.log(password)
             var err  = new Error('Forbidden')
             //set status
+            logger.error(err)
             res.status(403).set('WWW-Authenticate','Basic').json()
             next(err)
         }
         if (!check){
             var err = new Error('Unauthorized')
+            logger.error(err)
             res.status(401).set('WWW-Authenticate','Basic').json()
             next(err)
         }
+        logger.info("Authenticated")
         res.status(200)
         next()
     }
@@ -128,6 +137,7 @@ const authenticateProductUpdate = async(req,res,next)=>{
             // console.log(productInfo[0])
             if (typeof(productInfo[0]) === "undefined") {
                 var err = new Error('Not Found')
+                logger.error(err)
                 res.status(404).send()
             }
             const productOwner = productInfo[0].dataValues.owner_user_id
@@ -137,17 +147,21 @@ const authenticateProductUpdate = async(req,res,next)=>{
                 var err  = new Error('Forbidden')
                 // set status
                 res.status(403).set('WWW-Authenticate','Basic').json()
+                logger.error(err)
                 next(err)
             }
             if (!check){
                 var err = new Error('Unauthorized')
                 res.status(401).set('WWW-Authenticate','Basic').json()
+                logger.error(err)
                 next(err)
             }
+            logger.info("Authenticated")
             res.status(200)
             next()
         }
     } catch(error){
+        logger.error(error)
         res.status(401).send()
     }
 }
@@ -157,6 +171,7 @@ const authenticateProduct = async(req,res,next)=>{
         if(!req.get('Authorization')){
             var err= new Error('Not Authenticated')
             //
+            logger.error(err)
             res.status(401).set('WWW-Authenticate','Basic').send()
             next(err)
         }else {
@@ -183,6 +198,7 @@ const authenticateProduct = async(req,res,next)=>{
             // }
             if (!check){
                 var err = new Error('Unauthorized')
+                logger.error(err)
                 res.status(401).set('WWW-Authenticate','Basic').send()
                 next(err)
             }
@@ -190,6 +206,7 @@ const authenticateProduct = async(req,res,next)=>{
             next()
         }    
     } catch (error) {
+        logger.error(error)
         res.status(401).send()
     }
     
@@ -201,9 +218,12 @@ app.get('/v1/user/:userId',authenticate,async(req,res)=>{
     try {
         const id = req.params.userId 
         const data = await findById(id)
+        logger.info( 'GET user information')
+        client.increment('GET USER')
         res.status(201).json(data)
           
     } catch (error) {
+        logger.error(error)
         res.status(403).json()
     }
     
@@ -217,10 +237,14 @@ app.put('/v1/user/:userId',authenticate,async(req,res)=>{
         if(password!=null&&first_name!=null&&last_name!=null&&username==null){
             const id = req.params.userId    
             const data = await update(id,first_name,last_name,hashedPassword)
+            logger.info("Update user's account")
+            client.increment('UPDATE USER')
             res.status(204).json()    
         }
+        logger.error("Input user's account information error")
         res.status(400).send()
     } catch (error) {
+        logger.error(error)
         res.status(400).json()
     }
 })
@@ -234,6 +258,7 @@ app.post('/v1/user',async(req,res)=>{
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(req.body.password,salt)
         if(req.body.first_name==null||req.body.last_name==null||req.body.password==null||req.body.username == null){
+            logger.error("Request body error")
             res.status(400).json();    
         } else {
             const valid = username.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi)
@@ -242,12 +267,16 @@ app.post('/v1/user',async(req,res)=>{
             // delete note.password
                 delete note.dataValues.password
             // const returnUser = await findById(note[0].id)
+                logger.info("Create a user account")
+                client.increment('CREATE USER')
                 res.status(201).json(note)
             } else {
+                logger.error("username invalid")
             res.status(400).json()
             }
         }
     } catch (error) {
+        logger.error(error)
         res.status(400).send()  
     }
 })
@@ -264,13 +293,16 @@ app.post('/v1/product',authenticateProduct,async(req,res)=>{
         // console.log(!String.isString(name))
         // console.log(1)
         if(!Number.isInteger(quantity)){
-        console.log(1)
+        logger.error("Number is not an integer")
         res.status(400).send() 
         } else {
         const product = await createProduct(name,description,sku,manufacturer,quantity,owner_user_id)
+        logger.info("Create a new product")
+        client.increment('CREATE PRODUCT')
         res.status(201).json(product)
         }
     } catch (error) {
+        logger.error(error)
         res.status(400).send()
     }
     
@@ -288,9 +320,12 @@ app.put('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
         // if (owner_user_id === product[0].dataValues.owner_user_id){
             const {name,description,sku,manufacturer,quantity} = req.body
             if(name==null||description==null||sku==null||manufacturer==null||quantity==null||!Number.isInteger(quantity)){
+                logger.error("request body invalid")
                 res.status(400).send()
             } else {
                 await updateProduct(req.params.productId,name,description,sku,manufacturer,quantity)
+                logger.info("Update the product")
+                client.increment('UPDATE PRODUCT')
                 res.status(204).send()
             }
             // console.log(name)
@@ -299,6 +334,7 @@ app.put('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
         // }
         
     } catch (error) {
+        logger.error(error)
         res.status(400).send()
     }
 })
@@ -308,20 +344,37 @@ app.patch('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
         const {name,description,sku,manufacturer,quantity} = req.body
         if(Number.isInteger(quantity)){
             const productInfo = await updateProduct(req.params.productId,name,description,sku,manufacturer,quantity)
+            logger.info("Update the product")
+            client.increment('UPDATE PRODUCT')
             res.status(204).send()
         }
+        logger.error("Quantity is invalid")
         res.status(400).send()
     } catch (error) {
+        logger.error(error)
         res.status(400).send()
     }
 })
 
 app.delete('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
     try {
-
+        const imageInfo = await findImageAll(req.params.productId)
+        const len = imageInfo.length
+        for (let i = 0; i < len ; i++) {
+           const params = {
+            Bucket: bucketName,
+            Key: `${req.params.productId}/${imageInfo[i].dataValues.file_name}`,
+            }  
+        const command = new DeleteObjectCommand(params)
+        await s3.send(command)
+        }
+        const Image = await deleteAll(req.params.productId)
         await deleteProduct(req.params.productId)
+        logger.info("Delete the product")
+        client.increment('DELETE PRODUCT')
         res.status(204).send()
     } catch (error) {
+        logger.error(error)
         res.status(400).send()
     }
 })
@@ -329,8 +382,11 @@ app.delete('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
 app.get('/v1/product/:productId',async(req,res)=>{
     try {
         const productInfo = await findProductById(req.params.productId)
+        logger.info("Get the product information")
+        client.increment('GET PRODUCT')
         res.status(200).json(productInfo[0])
     } catch (error) {
+        logger.error(error)
         res.status(400).send()
     }
 })
@@ -339,10 +395,13 @@ app.get('/v1/product/:productId',async(req,res)=>{
 app.get('/v1/product/:productId/image',authenticateProductUpdate,async(req,res)=>{
     try {
         const allImage = await findImageAll(req.params.productId)
+        logger.info("Get information of images of the product")
+        client.increment('GET IMAGES')
         // console.log(allImage)
         res.status(200).json(allImage)
     } catch (error) {
-        
+        logger.error(error)
+        res.status(400).send
     }
 })
 //upload an image
@@ -368,12 +427,17 @@ app.post('/v1/product/:productId/image',authenticateProductUpdate,upload.single(
             const commandPut = new PutObjectCommand(params)
             // console.log(0)
             await s3.send(commandPut)
+            logger.info("Send the image to the S3 Bucket")
             // console.log(url)
             const result = await createImage(req.params.productId,random,params.Key)
+            logger.info("Upload an image successfully")
+            client.increment('UPLOAD IMAGE')
             res.status(201).send(result)  
         }
+        logger.error("File is not an image")
         res.status(400).send()
     } catch (error) {
+        logger.error(error)
        res.status(400).json({error:error})
     }
     
@@ -384,10 +448,14 @@ app.get('/v1/product/:productId/image/:image_id',authenticateProductUpdate,async
    try {
     const imageInfo = await findImageById(req.params.image_id,req.params.productId);
     if(typeof(imageInfo[0])==="undefined"){
+        logger.error("Image not exist")
+        client.increment('GET IMAGE')
         res.status(403).send()
     }
+    logger.info("Get the image details")
     res.status(200).json(imageInfo[0])
    } catch (error) {
+    logger.error(error)
     res.status(404).send()
    }
 //     const getObjectParams = {
@@ -408,9 +476,13 @@ app.delete('/v1/product/:productId/image/:image_id',authenticateProductUpdate,as
         }
         const command = new DeleteObjectCommand(params)
         await s3.send(command)
+        logger.info("delete image from S3 Bucket")
         const result = await deleteImageById(req.params.image_id,req.params.productId)
+        logger.info("Successfully Deleted")
+        client.increment('DELETE IMAGE')
         res.status(204).send()
     } catch (error) {
+        logger.error(error)
         res.status(404).send(error)
     }
 })
@@ -422,4 +494,13 @@ app.delete('/v1/product/:productId/image/:image_id',authenticateProductUpdate,as
 // })
 
 // export const server1 = app.listen(3001)
+// logger.error("error")
+// logger.warn("warn")
+// logger.info("info")
+// logger.verbose("verbose")
+// logger.debug("debug")
+// logger.silly("silly")
+// app.listen(3001,async()=>{
+//    logger.info("app is running in node：")
+// })
 export const server = app.listen(3000)
