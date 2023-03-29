@@ -74,6 +74,8 @@ build {
   provisioner "shell" {
     script = "./packer/app.sh"
   }
-
+  provisioner "shell" {
+    script = "./packer/cloudwatch.sh"
+  }
 
 }
