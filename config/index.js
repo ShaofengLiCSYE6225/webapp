@@ -1,5 +1,6 @@
 import {Sequelize} from 'sequelize'
 import dotenv from 'dotenv'
+import logger from '../log.js'
 dotenv.config()
 const{
     DATABASE_NAME ,//'webapp'
@@ -15,7 +16,8 @@ const{
 
 const  sequelize = new Sequelize(DATABASE_NAME,DATABASE_USERNAME,DATABASE_PASSWORD,{
     dialect:DIALECT,
-    host: process.env.DATABASE_HOST
+    logging:(message) => {logger.info(message)}
+    // host: process.env.DATABASE_HOST
 })
 
 // sequelize.authenticate().then(()=>{
