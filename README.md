@@ -1,5 +1,5 @@
 # webapp
-CSYE 6225 Assignment6
+CSYE 6225 Assignment7
 ## Prerequisites for building and deploying your application locally.
 1. install Node.js
 2. install Mysql
