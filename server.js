@@ -62,9 +62,9 @@ app.use(express.json())
 //Health endpoints, unauthenticated
 app.get('/healthz',(req,res)=>{
     try {
+        client.increment('healthz')
         logger.info("Connection health")
         res.status(200).send()
-        client.increment('healthz')
     } catch (error) {
         logger.error(error)
     }
@@ -216,10 +216,11 @@ const authenticateProduct = async(req,res,next)=>{
 //authenticated get user account information
 app.get('/v1/user/:userId',authenticate,async(req,res)=>{
     try {
+        client.increment('GET USER')
         const id = req.params.userId 
         const data = await findById(id)
         logger.info( 'GET user information')
-        client.increment('GET USER')
+        
         res.status(201).json(data)
           
     } catch (error) {
@@ -231,6 +232,7 @@ app.get('/v1/user/:userId',authenticate,async(req,res)=>{
 //authenticated user update user's account information
 app.put('/v1/user/:userId',authenticate,async(req,res)=>{
     try {
+        client.increment('UPDATE USER')
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(req.body.password,salt)
         const {first_name,last_name,password,username} = req.body
@@ -238,7 +240,7 @@ app.put('/v1/user/:userId',authenticate,async(req,res)=>{
             const id = req.params.userId    
             const data = await update(id,first_name,last_name,hashedPassword)
             logger.info("Update user's account")
-            client.increment('UPDATE USER')
+            
             res.status(204).json()    
         }
         logger.error("Input user's account information error")
@@ -254,6 +256,7 @@ app.put('/v1/user/:userId',authenticate,async(req,res)=>{
 // public
 app.post('/v1/user',async(req,res)=>{
     try {
+        client.increment('CREATE USER')
         const {first_name,last_name,password,username} = req.body
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(req.body.password,salt)
@@ -268,7 +271,7 @@ app.post('/v1/user',async(req,res)=>{
                 delete note.dataValues.password
             // const returnUser = await findById(note[0].id)
                 logger.info("Create a user account")
-                client.increment('CREATE USER')
+                
                 res.status(201).json(note)
             } else {
                 logger.error("username invalid")
@@ -284,6 +287,7 @@ app.post('/v1/user',async(req,res)=>{
 // add a new product
 app.post('/v1/product',authenticateProduct,async(req,res)=>{
     try {
+        client.increment('CREATE PRODUCT')
         const {name, description,sku,manufacturer,quantity} = req.body
         const credentials = Buffer.from(req.get('Authorization').split(' ')[1],'base64')
         .toString()
@@ -298,7 +302,7 @@ app.post('/v1/product',authenticateProduct,async(req,res)=>{
         } else {
         const product = await createProduct(name,description,sku,manufacturer,quantity,owner_user_id)
         logger.info("Create a new product")
-        client.increment('CREATE PRODUCT')
+        
         res.status(201).json(product)
         }
     } catch (error) {
@@ -311,6 +315,7 @@ app.post('/v1/product',authenticateProduct,async(req,res)=>{
 
 app.put('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
     try {
+        client.increment('UPDATE PRODUCT')
         // const credentials = Buffer.from(req.get('Authorization').split(' ')[1],'base64')
         // .toString()
         // .split(':')
@@ -325,7 +330,7 @@ app.put('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
             } else {
                 await updateProduct(req.params.productId,name,description,sku,manufacturer,quantity)
                 logger.info("Update the product")
-                client.increment('UPDATE PRODUCT')
+                
                 res.status(204).send()
             }
             // console.log(name)
@@ -341,11 +346,12 @@ app.put('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
 
 app.patch('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
     try {
+        client.increment('UPDATE PRODUCT')
         const {name,description,sku,manufacturer,quantity} = req.body
         if(Number.isInteger(quantity)){
             const productInfo = await updateProduct(req.params.productId,name,description,sku,manufacturer,quantity)
             logger.info("Update the product")
-            client.increment('UPDATE PRODUCT')
+            
             res.status(204).send()
         }
         logger.error("Quantity is invalid")
@@ -358,6 +364,7 @@ app.patch('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
 
 app.delete('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
     try {
+        client.increment('DELETE PRODUCT')
         const imageInfo = await findImageAll(req.params.productId)
         const len = imageInfo.length
         for (let i = 0; i < len ; i++) {
@@ -371,7 +378,7 @@ app.delete('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
         const Image = await deleteAll(req.params.productId)
         await deleteProduct(req.params.productId)
         logger.info("Delete the product")
-        client.increment('DELETE PRODUCT')
+        
         res.status(204).send()
     } catch (error) {
         logger.error(error)
@@ -381,9 +388,10 @@ app.delete('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
 
 app.get('/v1/product/:productId',async(req,res)=>{
     try {
+        client.increment('GET PRODUCT')
         const productInfo = await findProductById(req.params.productId)
         logger.info("Get the product information")
-        client.increment('GET PRODUCT')
+        
         res.status(200).json(productInfo[0])
     } catch (error) {
         logger.error(error)
@@ -393,10 +401,11 @@ app.get('/v1/product/:productId',async(req,res)=>{
 
 //get list of all images uploaded
 app.get('/v1/product/:productId/image',authenticateProductUpdate,async(req,res)=>{
+    client.increment('GET IMAGES')
     try {
         const allImage = await findImageAll(req.params.productId)
         logger.info("Get information of images of the product")
-        client.increment('GET IMAGES')
+        
         // console.log(allImage)
         res.status(200).json(allImage)
     } catch (error) {
@@ -406,6 +415,7 @@ app.get('/v1/product/:productId/image',authenticateProductUpdate,async(req,res)=
 })
 //upload an image
 app.post('/v1/product/:productId/image',authenticateProductUpdate,upload.single('image'),async(req,res)=>{
+    client.increment('UPLOAD IMAGE')
     try {
         // console.log("req.body",req.body)
         // console.log("req.file",req.file)
@@ -431,7 +441,6 @@ app.post('/v1/product/:productId/image',authenticateProductUpdate,upload.single(
             // console.log(url)
             const result = await createImage(req.params.productId,random,params.Key)
             logger.info("Upload an image successfully")
-            client.increment('UPLOAD IMAGE')
             res.status(201).send(result)  
         }
         logger.error("File is not an image")
@@ -445,11 +454,12 @@ app.post('/v1/product/:productId/image',authenticateProductUpdate,upload.single(
 
 //get image details
 app.get('/v1/product/:productId/image/:image_id',authenticateProductUpdate,async(req,res)=>{
-   try {
+    client.increment('GET IMAGE')
+    try {
     const imageInfo = await findImageById(req.params.image_id,req.params.productId);
     if(typeof(imageInfo[0])==="undefined"){
         logger.error("Image not exist")
-        client.increment('GET IMAGE')
+        
         res.status(403).send()
     }
     logger.info("Get the image details")
@@ -468,6 +478,7 @@ app.get('/v1/product/:productId/image/:image_id',authenticateProductUpdate,async
 
 //delete the image
 app.delete('/v1/product/:productId/image/:image_id',authenticateProductUpdate,async(req,res)=>{
+    client.increment('DELETE IMAGE')
     try {
         const imageInfo = await findImageById(req.params.image_id,req.params.productId)
         const params = {
@@ -479,7 +490,7 @@ app.delete('/v1/product/:productId/image/:image_id',authenticateProductUpdate,as
         logger.info("delete image from S3 Bucket")
         const result = await deleteImageById(req.params.image_id,req.params.productId)
         logger.info("Successfully Deleted")
-        client.increment('DELETE IMAGE')
+        
         res.status(204).send()
     } catch (error) {
         logger.error(error)
