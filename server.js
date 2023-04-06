@@ -215,8 +215,8 @@ const authenticateProduct = async(req,res,next)=>{
 
 //authenticated get user account information
 app.get('/v1/user/:userId',authenticate,async(req,res)=>{
+    client.increment('GET USER')
     try {
-        client.increment('GET USER')
         const id = req.params.userId 
         const data = await findById(id)
         logger.info( 'GET user information')
@@ -231,8 +231,9 @@ app.get('/v1/user/:userId',authenticate,async(req,res)=>{
 })
 //authenticated user update user's account information
 app.put('/v1/user/:userId',authenticate,async(req,res)=>{
+    client.increment('UPDATE USER')
     try {
-        client.increment('UPDATE USER')
+        
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(req.body.password,salt)
         const {first_name,last_name,password,username} = req.body
@@ -255,8 +256,8 @@ app.put('/v1/user/:userId',authenticate,async(req,res)=>{
 // create a user account
 // public
 app.post('/v1/user',async(req,res)=>{
+    client.increment('CREATE USER')
     try {
-        client.increment('CREATE USER')
         const {first_name,last_name,password,username} = req.body
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(req.body.password,salt)
@@ -286,8 +287,9 @@ app.post('/v1/user',async(req,res)=>{
 
 // add a new product
 app.post('/v1/product',authenticateProduct,async(req,res)=>{
+    client.increment('CREATE PRODUCT')
     try {
-        client.increment('CREATE PRODUCT')
+        
         const {name, description,sku,manufacturer,quantity} = req.body
         const credentials = Buffer.from(req.get('Authorization').split(' ')[1],'base64')
         .toString()
@@ -314,8 +316,9 @@ app.post('/v1/product',authenticateProduct,async(req,res)=>{
 })
 
 app.put('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
+    client.increment('UPDATE PRODUCT')
     try {
-        client.increment('UPDATE PRODUCT')
+        
         // const credentials = Buffer.from(req.get('Authorization').split(' ')[1],'base64')
         // .toString()
         // .split(':')
@@ -345,8 +348,9 @@ app.put('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
 })
 
 app.patch('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
+    client.increment('UPDATE PRODUCT')
     try {
-        client.increment('UPDATE PRODUCT')
+        
         const {name,description,sku,manufacturer,quantity} = req.body
         if(Number.isInteger(quantity)){
             const productInfo = await updateProduct(req.params.productId,name,description,sku,manufacturer,quantity)
@@ -363,8 +367,9 @@ app.patch('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
 })
 
 app.delete('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
+    client.increment('DELETE PRODUCT')
     try {
-        client.increment('DELETE PRODUCT')
+        
         const imageInfo = await findImageAll(req.params.productId)
         const len = imageInfo.length
         for (let i = 0; i < len ; i++) {
@@ -387,8 +392,9 @@ app.delete('/v1/product/:productId',authenticateProductUpdate,async(req,res)=>{
 })
 
 app.get('/v1/product/:productId',async(req,res)=>{
+    client.increment('GET PRODUCT')
     try {
-        client.increment('GET PRODUCT')
+        
         const productInfo = await findProductById(req.params.productId)
         logger.info("Get the product information")
         
@@ -442,9 +448,10 @@ app.post('/v1/product/:productId/image',authenticateProductUpdate,upload.single(
             const result = await createImage(req.params.productId,random,params.Key)
             logger.info("Upload an image successfully")
             res.status(201).send(result)  
-        }
+        } else{
         logger.error("File is not an image")
         res.status(400).send()
+        }
     } catch (error) {
         logger.error(error)
        res.status(400).json({error:error})
