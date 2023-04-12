@@ -34,5 +34,33 @@ jobs:
 
       - name: Build `AMI`
         run: packer build ./packer/webapp.pkr.hcl
+
+      - name: Install Cli
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
+          unzip -q /tmp/awscliv2.zip -d /tmp
+          rm /tmp/awscliv2.zip
+          sudo /tmp/aws/install --update
+          rm -rf /tmp/aws/
       
-    
+      - name: Get ami id
+        run: |
+          ami_id =$(aws ec2 describe-images --filters "Name=name,Values=csye6225*" --query 'sort_by(Images, &CreationDate)[-1].ImageId')
+          echo "ami_id =${ami_id}" >> $GITHUB_ENV
+
+      - name: Get template id
+        run: template_id = $(aws ec2 describe-launch-templates --query 'sort_by(LaunchTemplates, &LatestVersionNumber)[-1].LaunchTemplateId')
+          echo "template_id =${template_id}" >> $GITHUB_ENV
+
+      - name: Get template source version
+        run: source_version = $(aws ec2 describe-launch-templates --query 'sort_by(LaunchTemplates, &LatestVersionNumber)[-1].LatestVersionNumber')
+          echo "source_version = ${source_version}" >> $GITHUB_ENV
+
+      - name: Create launch template version
+        run: aws ec2 create-launch-template-version --source-version source_version --launch-template-id template_id --launch-template-data '{"ImageId":${ami_id}}'
+      
+      # - name: Create autoscaling group
+      #   run: aws autoscaling create-auto-scaling-group --min-size 1 --max-size 3 --auto-scaling-group-name asg --launch-template LaunchTemplateId=template_id
+      
+      - name: Instance refresh
+        run: aws autoscaling start-instance-refresh  --auto-scaling-group-name csye6225-asg-spring2023
