@@ -5,12 +5,12 @@ on:
     branches: [ "main" ]
     types:
       - closed
-env:
-    AWS_ACCESS_KEY: ${{secrets.AWS_ACCESS_KEY}}
-    AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_ACCESS_SECRET_KEY}}
-    aws_access_key_id: ${{secrets.PROD_ACCESS_KEY}}
-    aws_secret_access_key: ${{secrets.PROD_ACCESS_SECRET_KEY}}
-    AWS_REGION : us-east-1
+# env:
+    # AWS_ACCESS_KEY: ${{secrets.AWS_ACCESS_KEY}}
+    # AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_ACCESS_SECRET_KEY}}
+    # aws_access_key_id: ${{secrets.PROD_ACCESS_KEY}}
+    # aws_secret_access_key: ${{secrets.PROD_ACCESS_SECRET_KEY}}
+    # AWS_REGION : us-east-1
 jobs:
   
   if_merged:
@@ -19,7 +19,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        
+
+      - name: Setup demo credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY}}
+          aws-secret-access-key: ${{secrets.AWS_ACCESS_SECRET_KEY}}
+          aws-region: us-east-1
       - name: Zip webapp  
         run: | 
           cd ..
@@ -38,6 +44,13 @@ jobs:
       - name: Build `AMI`
         run: packer build ./packer/webapp.pkr.hcl
 
+      - name: Setup demo credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{secrets.PROD_ACCESS_KEY}}
+          aws-secret-access-key: ${{secrets.PROD_ACCESS_SECRET_KEY}}
+          aws-region: us-east-1
+      
       - name: Install Cli
         run: |
           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
@@ -45,12 +58,8 @@ jobs:
           rm /tmp/awscliv2.zip
           sudo /tmp/aws/install --update
           rm -rf /tmp/aws/
-          
-      - name: Aws credentials
-        run: |
-          aws configure
-          aws_access_key_id:{{secrets.PROD_ACCESS_KEY}}
-          aws_secret_access_key:{{secrets.PROD_ACCESS_SECRET_KEY}}
+
+     
 
       - name: Get ami id
         run: |
