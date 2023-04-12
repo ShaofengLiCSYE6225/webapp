@@ -75,7 +75,7 @@ jobs:
           echo "SOURCE_VERSION=$source_version" >> $GITHUB_ENV
 
       - name: Create launch template version
-        run: aws ec2 create-launch-template-version --source-version source_version --launch-template-id template_id --launch-template-data '{"ImageId":${ami_id}}'
+        run: aws ec2 create-launch-template-version --source-version source_version --launch-template-id template_id --launch-template-data '{"ImageId":$ami_id}'
       
       # - name: Create autoscaling group
       #   run: aws autoscaling create-auto-scaling-group --min-size 1 --max-size 3 --auto-scaling-group-name asg --launch-template LaunchTemplateId=template_id
