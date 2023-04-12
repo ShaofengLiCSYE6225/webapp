@@ -48,15 +48,15 @@ jobs:
       - name: Get ami id
         run: |
           ami_id =$(aws ec2 describe-images --filters "Name=name,Values=csye6225*" --query 'sort_by(Images, &CreationDate)[-1].ImageId')
-          echo "ami_id =${ami_id}" >> $GITHUB_ENV
+          echo "AMI_ID =$ami_id" >> $GITHUB_ENV
 
       - name: Get template id
         run: template_id = $(aws ec2 describe-launch-templates --query 'sort_by(LaunchTemplates, &LatestVersionNumber)[-1].LaunchTemplateId')
-          echo "template_id =${template_id}" >> $GITHUB_ENV
+          echo "TEMPLATE_ID =$template_id" >> $GITHUB_ENV
 
       - name: Get template source version
         run: source_version = $(aws ec2 describe-launch-templates --query 'sort_by(LaunchTemplates, &LatestVersionNumber)[-1].LatestVersionNumber')
-          echo "source_version = ${source_version}" >> $GITHUB_ENV
+          echo "SOURCE_VERSION = $source_version" >> $GITHUB_ENV
 
       - name: Create launch template version
         run: aws ec2 create-launch-template-version --source-version source_version --launch-template-id template_id --launch-template-data '{"ImageId":${ami_id}}'
