@@ -10,6 +10,7 @@ env:
     AWS_SECRET_ACCESS_KEY: ${{secrets.PROD_ACCESS_SECRET_KEY}}
     PROD_AWS_ACCESS_KEY: ${{secrets.PROD_ACCESS_KEY}}
     PROD_AWS_SECRET_ACCESS_KEY: ${{secrets.PROD_ACCESS_SECRET_KEY}}
+    AWS_REGION : us-east-1
 jobs:
   
   if_merged:
@@ -47,16 +48,16 @@ jobs:
       
       - name: Get ami id
         run: |
-          ami_id =$(aws ec2 describe-images --filters "Name=name,Values=csye6225*" --query 'sort_by(Images, &CreationDate)[-1].ImageId')
-          echo "AMI_ID =$ami_id" >> $GITHUB_ENV
+          ami_id=$(aws ec2 describe-images --filters "Name=name,Values=csye6225*" --query 'sort_by(Images, &CreationDate)[-1].ImageId' --output text)
+          echo "AMI_ID=$ami_id" >> $GITHUB_ENV
 
       - name: Get template id
-        run: template_id = $(aws ec2 describe-launch-templates --query 'sort_by(LaunchTemplates, &LatestVersionNumber)[-1].LaunchTemplateId')
-          echo "TEMPLATE_ID =$template_id" >> $GITHUB_ENV
+        run: template_id=$(aws ec2 describe-launch-templates --query 'sort_by(LaunchTemplates, &LatestVersionNumber)[-1].LaunchTemplateId')
+          echo "TEMPLATE_ID=$template_id" >> $GITHUB_ENV
 
       - name: Get template source version
-        run: source_version = $(aws ec2 describe-launch-templates --query 'sort_by(LaunchTemplates, &LatestVersionNumber)[-1].LatestVersionNumber')
-          echo "SOURCE_VERSION = $source_version" >> $GITHUB_ENV
+        run: source_version=$(aws ec2 describe-launch-templates --query 'sort_by(LaunchTemplates, &LatestVersionNumber)[-1].LatestVersionNumber')
+          echo "SOURCE_VERSION=$source_version" >> $GITHUB_ENV
 
       - name: Create launch template version
         run: aws ec2 create-launch-template-version --source-version source_version --launch-template-id template_id --launch-template-data '{"ImageId":${ami_id}}'
