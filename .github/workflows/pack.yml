@@ -67,11 +67,13 @@ jobs:
           echo "AMI_ID=$ami_id" >> $GITHUB_ENV
 
       - name: Get template id
-        run: template_id=$(aws ec2 describe-launch-templates --query 'sort_by(LaunchTemplates, &LatestVersionNumber)[-1].LaunchTemplateId' --output text)
+        run: |
+          template_id=$(aws ec2 describe-launch-templates --query 'sort_by(LaunchTemplates, &LatestVersionNumber)[-1].LaunchTemplateId' --output text)
           echo "TEMPLATE_ID=$template_id" >> $GITHUB_ENV
 
       - name: Get template source version
-        run: source_version=$(aws ec2 describe-launch-templates --query 'sort_by(LaunchTemplates, &LatestVersionNumber)[-1].LatestVersionNumber' --output text)
+        run: |
+          source_version=$(aws ec2 describe-launch-templates --query 'sort_by(LaunchTemplates, &LatestVersionNumber)[-1].LatestVersionNumber' --output text)
           echo "SOURCE_VERSION=$source_version" >> $GITHUB_ENV
 
       - name: Create launch template version
