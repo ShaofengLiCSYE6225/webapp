@@ -95,6 +95,10 @@ const authenticate = async(req,res,next)=>{
         
         
         const psd = await findByUsername(username)
+        if (psd[0] === undefined){
+            res.status(404).set('WWW-Authenticate','Basic').json()
+            next(err)
+        }
         // const psdObj = JSON.stringify(psd)
         const check = await bcrypt.compare(password,psd[0].dataValues.password)
         // console.log(psd[0].dataValues.id)
@@ -136,6 +140,10 @@ const authenticateProductUpdate = async(req,res,next)=>{
             
             
             const psd = await findByUsername(username)
+            if (psd[0] === undefined){
+                res.status(404).set('WWW-Authenticate','Basic').json()
+                next(err)
+            }
             // console.log(psd[0])
             // const psdObj = JSON.stringify(psd)
             const check = await bcrypt.compare(password,psd[0].dataValues.password)
@@ -192,6 +200,10 @@ const authenticateProduct = async(req,res,next)=>{
             
             
             const psd = await findByUsername(username)
+            if (psd[0] === undefined){
+                res.status(404).set('WWW-Authenticate','Basic').json()
+            next(err)
+            }
             // const psdObj = JSON.stringify(psd)
             const check = await bcrypt.compare(password,psd[0].dataValues.password)
             // console.log(psd[0].dataValues.id)
