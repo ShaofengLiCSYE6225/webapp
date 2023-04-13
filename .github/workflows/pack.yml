@@ -20,29 +20,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      # - name: Setup demo credentials
-      #   uses: aws-actions/configure-aws-credentials@v1
-      #   with:
-      #     aws-access-key-id: ${{secrets.AWS_ACCESS_KEY}}
-      #     aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-      #     aws-region: us-east-1
-      # - name: Zip webapp  
-      #   run: | 
-      #     cd ..
-      #     zip -r webapp.zip webapp/
-      #     cd webapp
-      #     ls -al
-      #     sleep 10
+      - name: Setup demo credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY}}
+          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          aws-region: us-east-1
+      - name: Zip webapp  
+        run: | 
+          cd ..
+          zip -r webapp.zip webapp/
+          cd webapp
+          ls -al
+          sleep 10
           
-      # - name: Setup `packer`
-      #   uses: hashicorp/setup-packer@main
-      #   id: setup
+      - name: Setup `packer`
+        uses: hashicorp/setup-packer@main
+        id: setup
         
-      # - name: Run `packer init`
-      #   run: packer init ./packer/webapp.pkr.hcl
+      - name: Run `packer init`
+        run: packer init ./packer/webapp.pkr.hcl
 
-      # - name: Build `AMI`
-      #   run: packer build ./packer/webapp.pkr.hcl
+      - name: Build `AMI`
+        run: packer build ./packer/webapp.pkr.hcl
 
       - name: Setup demo credentials
         uses: aws-actions/configure-aws-credentials@v2
