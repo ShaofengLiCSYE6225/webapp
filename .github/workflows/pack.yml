@@ -67,15 +67,15 @@ jobs:
           echo "AMI_ID=$ami_id" >> $GITHUB_ENV
 
       - name: Get template id
-        run: template_id=$(aws ec2 describe-launch-templates --query 'sort_by(LaunchTemplates, &LatestVersionNumber)[-1].LaunchTemplateId')
+        run: template_id=$(aws ec2 describe-launch-templates --query 'sort_by(LaunchTemplates, &LatestVersionNumber)[-1].LaunchTemplateId' --output text)
           echo "TEMPLATE_ID=$template_id" >> $GITHUB_ENV
 
       - name: Get template source version
-        run: source_version=$(aws ec2 describe-launch-templates --query 'sort_by(LaunchTemplates, &LatestVersionNumber)[-1].LatestVersionNumber')
+        run: source_version=$(aws ec2 describe-launch-templates --query 'sort_by(LaunchTemplates, &LatestVersionNumber)[-1].LatestVersionNumber' --output text)
           echo "SOURCE_VERSION=$source_version" >> $GITHUB_ENV
 
       - name: Create launch template version
-        run: aws ec2 create-launch-template-version --source-version source_version --launch-template-id template_id --launch-template-data '{"ImageId":$ami_id}'
+        run: aws ec2 create-launch-template-version --source-version source_version --launch-template-id template_id --launch-template-data '{"ImageId":\"$ami_id\"}'
       
       # - name: Create autoscaling group
       #   run: aws autoscaling create-auto-scaling-group --min-size 1 --max-size 3 --auto-scaling-group-name asg --launch-template LaunchTemplateId=template_id
