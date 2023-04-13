@@ -69,6 +69,15 @@ app.get('/healthz',(req,res)=>{
         logger.error(error)
     }
 })
+app.get('/test',(req,res)=>{
+    try {
+        client.increment('test')
+        logger.info("test")
+        res.status(200).send()
+    } catch (error) {
+        logger.error(error)
+    }
+})
 // authenticated functions
 const authenticate = async(req,res,next)=>{
     if(!req.get('Authorization')){
