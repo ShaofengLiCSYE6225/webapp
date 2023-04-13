@@ -20,29 +20,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup demo credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY}}
-          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-          aws-region: us-east-1
-      - name: Zip webapp  
-        run: | 
-          cd ..
-          zip -r webapp.zip webapp/
-          cd webapp
-          ls -al
-          sleep 10
+      # - name: Setup demo credentials
+      #   uses: aws-actions/configure-aws-credentials@v1
+      #   with:
+      #     aws-access-key-id: ${{secrets.AWS_ACCESS_KEY}}
+      #     aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      #     aws-region: us-east-1
+      # - name: Zip webapp  
+      #   run: | 
+      #     cd ..
+      #     zip -r webapp.zip webapp/
+      #     cd webapp
+      #     ls -al
+      #     sleep 10
           
-      - name: Setup `packer`
-        uses: hashicorp/setup-packer@main
-        id: setup
+      # - name: Setup `packer`
+      #   uses: hashicorp/setup-packer@main
+      #   id: setup
         
-      - name: Run `packer init`
-        run: packer init ./packer/webapp.pkr.hcl
+      # - name: Run `packer init`
+      #   run: packer init ./packer/webapp.pkr.hcl
 
-      - name: Build `AMI`
-        run: packer build ./packer/webapp.pkr.hcl
+      # - name: Build `AMI`
+      #   run: packer build ./packer/webapp.pkr.hcl
 
       - name: Setup demo credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -77,7 +77,7 @@ jobs:
           echo "SOURCE_VERSION=$source_version" >> $GITHUB_ENV
 
       - name: Create launch template version
-        run: aws ec2 create-launch-template-version --source-version source_version --launch-template-id template_id --launch-template-data '{"ImageId":\"$ami_id\"}'
+        run: aws ec2 create-launch-template-version --source-version SOURCE_VERSION --launch-template-id TEMPLATE_ID --launch-template-data '{\"ImageId\":\"$ami_id\"}'
       
       # - name: Create autoscaling group
       #   run: aws autoscaling create-auto-scaling-group --min-size 1 --max-size 3 --auto-scaling-group-name asg --launch-template LaunchTemplateId=template_id
