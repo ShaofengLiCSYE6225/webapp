@@ -8,3 +8,8 @@ CSYE 6225 Assignment7
 5. intall a postman if you like
 ## Build and Deploy instructions for the web application.
 1. run `npm run devStart`
+## Command to import SSL certificate
+aws --profile prod acm import-certificate --certificate fileb://prod_shaofengli_me.crt \
+      --certificate-chain fileb://prod_shaofengli_me.ca-bundle \
+      --private-key fileb://private.key
+
