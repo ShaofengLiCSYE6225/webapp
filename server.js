@@ -69,10 +69,10 @@ app.get('/healthz',(req,res)=>{
         logger.error(error)
     }
 })
-app.get('/healthz',(req,res)=>{
+app.get('/test',(req,res)=>{
     try {
-        client.increment('healthz')
-        logger.info("Connection health")
+        client.increment('test')
+        logger.info("Connection health test")
         res.status(200).send()
     } catch (error) {
         logger.error(error)
