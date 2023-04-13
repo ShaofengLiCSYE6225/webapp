@@ -60,7 +60,7 @@ app.use(express.json())
 
 
 //Health endpoints, unauthenticated
-app.get('/healthz',(req,res)=>{
+app.get('/health',(req,res)=>{
     try {
         client.increment('healthz')
         logger.info("Connection health")
@@ -214,7 +214,7 @@ const authenticateProduct = async(req,res,next)=>{
 
 
 //authenticated get user account information
-app.get('/v1/user/:userId',authenticate,async(req,res)=>{
+app.get('/v2/user/:userId',authenticate,async(req,res)=>{
     client.increment('GET USER')
     try {
         const id = req.params.userId 
