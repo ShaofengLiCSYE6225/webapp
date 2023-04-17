@@ -235,7 +235,7 @@ const authenticateProduct = async(req,res,next)=>{
 
 
 //authenticated get user account information
-app.get('/v1/user/:userId',authenticate,async(req,res)=>{
+app.get('/v2/user/:userId',authenticate,async(req,res)=>{
     client.increment('GET USER')
     try {
         const id = req.params.userId 
@@ -251,7 +251,7 @@ app.get('/v1/user/:userId',authenticate,async(req,res)=>{
     
 })
 //authenticated user update user's account information
-app.put('/v1/user/:userId',authenticate,async(req,res)=>{
+app.put('/v2/user/:userId',authenticate,async(req,res)=>{
     client.increment('UPDATE USER')
     try {
         
@@ -276,7 +276,7 @@ app.put('/v1/user/:userId',authenticate,async(req,res)=>{
 
 // create a user account
 // public
-app.post('/v1/user',async(req,res)=>{
+app.post('/v2/user',async(req,res)=>{
     client.increment('CREATE USER')
     try {
         const {first_name,last_name,password,username} = req.body
